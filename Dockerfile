@@ -24,8 +24,10 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy composer files
+# Copy composer files and Laravel bootstrap files needed for composer scripts
 COPY composer.json composer.lock ./
+COPY artisan ./
+COPY bootstrap ./bootstrap
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
