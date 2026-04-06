@@ -32,7 +32,7 @@ return new class extends Migration
                 'canceled'
             ])->default('pending');
             // Optional: Simpan reference ke user_address (untuk tracking)
-            $table->foreignId('user_address_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('user_address_id')->nullable();
             
             $table->timestamps();
         });
