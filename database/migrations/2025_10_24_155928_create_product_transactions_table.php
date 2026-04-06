@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('product_transactions', function (Blueprint $table) {
+        Schema::create('product_transactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');    
             $table->unsignedBigInteger('total_amount');
@@ -43,16 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('product_transactions', function (Blueprint $table) {
-            $table->dropForeign(['user_address_id']);
-            $table->dropColumn([
-                'address', 
-                'city', 
-                'post_code', 
-                'phone_number', 
-                'notes',
-                'user_address_id'
-            ]);
-        });
+        Schema::dropIfExists('product_transactions');
     }
 };
