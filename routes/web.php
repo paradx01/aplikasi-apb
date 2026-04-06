@@ -39,7 +39,7 @@ Route::middleware('auth')->group(function() {
     
     // Cart
     Route::resource('carts', CartController::class)->middleware('role:buyer');
-    Route::post('cart/add/{productId}', [CartController::class, 'store'])->middleware('role:buyer')->name('carts.store');
+    Route::post('cart/add/{productId}', [CartController::class, 'store'])->middleware('role:buyer')->name('carts.add');
 
     // Addresses List
     Route::prefix('addresses')->name('frontend.addresses.')->middleware('role:buyer')->group(function() {
