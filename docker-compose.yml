@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aplikasi-apb-app
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=false
+    volumes:
+      - storage_data:/var/www/html/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - apb-network
+
+  db:
+    image: mysql:8.0
+    container_name: aplikasi-apb-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-aplikasi_apb}
+      MYSQL_USER: ${DB_USERNAME:-apb_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootsecret}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - apb-network
+
+volumes:
+  db_data:
+  storage_data:
+
+networks:
+  apb-network:
+    driver: bridge

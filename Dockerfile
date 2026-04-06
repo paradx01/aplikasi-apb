@@ -21,6 +21,13 @@ RUN apt-get update && apt-get install -y \
 # Install PHP extensions
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
+# Enable Apache mod_rewrite (required for Laravel routing)
+RUN a2enmod rewrite
+
+# Configure Apache DocumentRoot to Laravel's /public folder
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf && \
+    sed -i 's|</VirtualHost>|<Directory /var/www/html/public>\n    AllowOverride All\n    Require all granted\n</Directory>\n</VirtualHost>|g' /etc/apache2/sites-available/000-default.conf
+
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -29,17 +36,21 @@ COPY composer.json composer.lock ./
 COPY artisan ./
 COPY bootstrap ./bootstrap
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Install PHP dependencies (no dev)
+RUN composer install --no-dev --optimize-autoloader --no-scripts
 
 # Copy application files & set permissions
 COPY --chown=www-data:www-data . .
 
+# Run composer scripts after all files are copied
+RUN composer run-script post-autoload-dump || true
+
 # Install Node.js dependencies and build assets
 RUN npm install && npm run build
 
-# Create storage link
-RUN php artisan storage:link
+# Set storage & cache permissions
+RUN chown -R www-data:www-data storage bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache
 
 # Expose port 80
 EXPOSE 80
