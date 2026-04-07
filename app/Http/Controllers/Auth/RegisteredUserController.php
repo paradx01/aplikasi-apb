@@ -41,12 +41,14 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $user->assignRole('buyer');
+
         event(new Registered($user));
 
         Auth::login($user);
 
         // Redirect sesuai role
-        if ($user->role === 'apoteker') {
+        if ($user->hasRole('apoteker')) {
             return redirect()->route('dashboard');
         } else {
             return redirect()->route('frontend.index'); // misal index store
