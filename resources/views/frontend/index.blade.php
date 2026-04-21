@@ -62,7 +62,8 @@
 				overflow: hidden;
 			}
 		</style>
-	</head>
+	    @include('partials.pwa')
+</head>
 
 	<body>
 		<!-- Topbar -->

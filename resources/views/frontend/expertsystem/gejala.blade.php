@@ -40,6 +40,7 @@
             transform: scale(0.98);
         }
     </style>
+    @include('partials.pwa')
 </head>
 <body>
     <!-- Topbar -->

@@ -45,6 +45,7 @@
             background-color: rgba(255, 107, 44, 0.05);
         }
     </style>
+    @include('partials.pwa')
 </head>
 <body>
     

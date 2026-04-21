@@ -1,6 +1,6 @@
 "use strict";
 
-const SW_VERSION = "v4";
+const SW_VERSION = "v5";
 const STATIC_CACHE = `static-${SW_VERSION}`;
 const RUNTIME_CACHE = `runtime-${SW_VERSION}`;
 const OFFLINE_URL = "/offline.html";

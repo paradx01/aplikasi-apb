@@ -43,6 +43,7 @@
             background-clip: text;
         }
     </style>
+    @include('partials.pwa')
 </head>
 <body>
     <!-- Topbar -->

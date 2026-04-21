@@ -6,6 +6,7 @@
     <title>Checkout Berhasil | Parma</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    @include('partials.pwa')
 </head>
 <body>
     @include('components.flash-toast')
