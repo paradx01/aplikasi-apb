@@ -55,5 +55,8 @@ RUN chown -R www-data:www-data storage bootstrap/cache && \
 # Expose port 80
 EXPOSE 80
 
-# Start Apache server
-CMD ["apache2-foreground"]
+# Start: create storage symlink + clear cache + start Apache
+CMD php artisan storage:link --force && \
+    php artisan config:clear && \
+    php artisan cache:clear && \
+    apache2-foreground
