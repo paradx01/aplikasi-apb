@@ -11,6 +11,56 @@ use Illuminate\Support\Facades\Auth;
 
 class FrontendController extends Controller
 {
+    /**
+     * Mapping field kondisi medis user ke label kontraindikasi produk
+     */
+    private const CONDITION_MAP = [
+        'has_hypertension'        => 'Hipertensi',
+        'has_heart_disorder'      => 'Gangguan Jantung',
+        'has_diabetes'            => 'Diabetes',
+        'has_kidney_disorder'     => 'Gangguan Ginjal',
+        'has_stomach_ulcer'       => 'Tukak Lambung',
+        'has_liver_disorder'      => 'Gangguan Hati',
+        'has_asthma'              => 'Asma',
+        'has_glaucoma'            => 'Glaukoma',
+        'has_prostate_disorder'   => 'Gangguan Prostat',
+        'has_hyperthyroidism'     => 'Hipertiroidisme',
+        'has_g6pd_deficiency'     => 'Defisiensi G6PD',
+        'has_allergy_paracetamol' => 'Alergi Paracetamol',
+        'has_allergy_nsaid'       => 'Alergi NSAID',
+        'has_allergy_aspirin'     => 'Alergi Aspirin',
+        'has_allergy_antihistamine'=> 'Alergi Antihistamin',
+        'has_allergy_decongestant'=> 'Alergi Dekongestan',
+        'has_allergy_bromhexine'  => 'Alergi Bromhexine',
+        'has_allergy_guaifenesin' => 'Alergi Guaifenesin',
+        'has_allergy_antacid'     => 'Alergi Antasida',
+    ];
+
+    /**
+     * Ambil daftar label kondisi medis aktif milik user
+     */
+    private function getUserActiveConditions($user): array
+    {
+        $conditions = [];
+        foreach (self::CONDITION_MAP as $field => $label) {
+            if ($user->$field) {
+                $conditions[] = $label;
+            }
+        }
+        return $conditions;
+    }
+
+    /**
+     * Cek apakah produk kontraindikasi dengan kondisi user
+     */
+    private function isProductContraindicated(Product $product, array $userConditions): bool
+    {
+        if (!$product->contraindications) return false;
+        
+        $productContra = array_map('trim', explode(',', $product->contraindications));
+        return !empty(array_intersect($userConditions, $productContra));
+    }
+
     //
     public function index(){
         $newProducts = Product::with('category')->orderBy('id', 'DESC')->take(6)->get();
@@ -19,8 +69,10 @@ class FrontendController extends Controller
 
         // Ambil data cart user yang sedang login
         $my_carts = [];
+        $userConditions = [];
         if (Auth::check()) {
             $my_carts = Auth::user()->carts()->with('product')->get();
+            $userConditions = $this->getUserActiveConditions(Auth::user());
         }
 
         $hasActiveReminder = false;
@@ -36,6 +88,7 @@ class FrontendController extends Controller
             'categories' => $categories,
             'my_carts' => $my_carts,
             'hasActiveReminder' => $hasActiveReminder,
+            'userConditions' => $userConditions,
         ]);
     }
 
@@ -46,37 +99,17 @@ class FrontendController extends Controller
         $safetyWarnings = [];
         $pregnancyWarning = null;
         $ageWarning = null;
+        $alternativeProducts = collect();
 
         if (Auth::check()) {
             $user = Auth::user();
+            $userConditions = $this->getUserActiveConditions($user);
 
             // 1. Cek kontraindikasi vs kondisi medis user
             if ($product->contraindications) {
                 $productContra = array_map('trim', explode(',', $product->contraindications));
                 
-                $conditionMap = [
-                    'has_hypertension'        => 'Hipertensi',
-                    'has_heart_disorder'      => 'Gangguan Jantung',
-                    'has_diabetes'            => 'Diabetes',
-                    'has_kidney_disorder'     => 'Gangguan Ginjal',
-                    'has_stomach_ulcer'       => 'Tukak Lambung',
-                    'has_liver_disorder'      => 'Gangguan Hati',
-                    'has_asthma'              => 'Asma',
-                    'has_glaucoma'            => 'Glaukoma',
-                    'has_prostate_disorder'   => 'Gangguan Prostat',
-                    'has_hyperthyroidism'     => 'Hipertiroidisme',
-                    'has_g6pd_deficiency'     => 'Defisiensi G6PD',
-                    'has_allergy_paracetamol' => 'Alergi Paracetamol',
-                    'has_allergy_nsaid'       => 'Alergi NSAID',
-                    'has_allergy_aspirin'     => 'Alergi Aspirin',
-                    'has_allergy_antihistamine'=> 'Alergi Antihistamin',
-                    'has_allergy_decongestant'=> 'Alergi Dekongestan',
-                    'has_allergy_bromhexine'  => 'Alergi Bromhexine',
-                    'has_allergy_guaifenesin' => 'Alergi Guaifenesin',
-                    'has_allergy_antacid'     => 'Alergi Antasida',
-                ];
-
-                foreach ($conditionMap as $field => $label) {
+                foreach (self::CONDITION_MAP as $field => $label) {
                     if ($user->$field && in_array($label, $productContra)) {
                         $safetyWarnings[] = $label;
                     }
@@ -117,6 +150,28 @@ class FrontendController extends Controller
                     $ageWarning = "Usia Anda ({$userAge} tahun) tidak termasuk dalam rentang usia yang direkomendasikan untuk obat ini. Konsultasikan dengan apoteker.";
                 }
             }
+
+            // 4. Cari obat alternatif yang AMAN jika ada warning
+            if (count($safetyWarnings) > 0 || $pregnancyWarning) {
+                $alternativeProducts = Product::where('category_id', $product->category_id)
+                    ->where('id', '!=', $product->id)
+                    ->with('category')
+                    ->get()
+                    ->filter(function ($altProduct) use ($userConditions, $user) {
+                        // Filter: tidak kontraindikasi dengan user
+                        if ($this->isProductContraindicated($altProduct, $userConditions)) {
+                            return false;
+                        }
+                        // Filter: aman untuk ibu hamil jika user hamil
+                        if ($user->is_pregnant && $user->gender == 'P') {
+                            $cat = strtoupper($altProduct->pregnancy_category ?? '');
+                            if (in_array($cat, ['X', 'D'])) return false;
+                        }
+                        return true;
+                    })
+                    ->take(4)
+                    ->values();
+            }
         }
 
         return view('frontend.details', [
@@ -125,25 +180,38 @@ class FrontendController extends Controller
             'safetyWarnings' => $safetyWarnings,
             'pregnancyWarning' => $pregnancyWarning,
             'ageWarning' => $ageWarning,
+            'alternativeProducts' => $alternativeProducts,
         ]);
     }
     
     public function category(Category $category){
+        $userConditions = [];
+        if (Auth::check()) {
+            $userConditions = $this->getUserActiveConditions(Auth::user());
+        }
+
         $products = Product::where('category_id', $category->id)->with('category')->get();
         return view('frontend.category', [
             'products' => $products,
             'category' => $category,
+            'userConditions' => $userConditions,
         ]);
     }
 
     public function search(Request $request){
         $keyword = $request->input('keyword');
+        
+        $userConditions = [];
+        if (Auth::check()) {
+            $userConditions = $this->getUserActiveConditions(Auth::user());
+        }
 
         $products = Product::where('name', 'LIKE', '%' . $keyword . '%')->get();
 
         return view('frontend.search', [
             'products' => $products,
             'keyword' => $keyword,
+            'userConditions' => $userConditions,
         ]);
     }
 }

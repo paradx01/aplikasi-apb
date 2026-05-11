@@ -92,6 +92,7 @@
           @forelse ($products as $product)
               <!-- Product -->
               <div class="py-3.5 pl-4 pr-[22px] bg-white rounded-2xl flex gap-2 items-center relative product-box" data-name="{{ strtolower($product->name) }}">
+              @include('partials.product_warning_badge', ['item' => $product])
               <img src="{{Storage::url($product->photo)}}" class="w-full max-w-[70px] max-h-[70px] object-contain"
                   alt="">
               <div class="flex flex-wrap items-center justify-between w-full gap-1">

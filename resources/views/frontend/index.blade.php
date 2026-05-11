@@ -267,6 +267,7 @@
 				<!-- Product -->
 				@forelse($product as $produk)
 				<div class="rounded-2xl bg-white py-3.5 pl-4 pr-[22px] inline-flex flex-col gap-4 items-start mr-4 relative w-[158px]">
+					@include('partials.product_warning_badge', ['item' => $produk])
 					<img src="{{Storage::url($produk->photo)}}" class="h-[100px] w-full object-contain" alt="">
 					<div>
 						<a href="{{route('frontend.product.details', $produk->slug)}}" class="text-base font-semibold w-[120px] truncate stretched-link block">
@@ -300,6 +301,7 @@
 					<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 						@foreach($shownProduct as $product)
 							<div class="rounded-2xl bg-white py-3.5 px-4 flex flex-col gap-4 items-start relative">
+								@include('partials.product_warning_badge', ['item' => $product])
 								<img src="{{ Storage::url($product->photo) }}"
 									class="h-[100px] w-full object-contain"
 									alt="{{ $product->name }}">
