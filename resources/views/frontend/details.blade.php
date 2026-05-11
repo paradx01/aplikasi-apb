@@ -145,8 +145,10 @@
     <div class="flex flex-row justify-center gap-2 mx-2 relative px-4 mb-4">
       @php
         // Cek apakah produk aman untuk anak berdasarkan medication_rules
+        // Produk dianggap aman anak jika ada aturan pakai dengan kategori "Anak-anak"
         $isChildSafe = $product->medicationRules->contains(function ($rule) {
-            return (!is_null($rule->min_age) && $rule->min_age <= 12);
+            $condition = strtolower($rule->special_condition ?? '');
+            return str_contains($condition, 'anak');
         });
 
         $features = [
