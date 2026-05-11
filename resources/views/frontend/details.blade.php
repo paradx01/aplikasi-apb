@@ -27,7 +27,7 @@
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
     }
   </style>
-    @include('partials.pwa')
+  @include('partials.pwa')
 </head>
 
 <body>
@@ -144,9 +144,14 @@
     <!-- Features Badges -->
     <div class="flex flex-row justify-center gap-2 mx-2 relative px-4 mb-4">
       @php
+        // Cek apakah produk aman untuk anak berdasarkan medication_rules
+        $isChildSafe = $product->medicationRules->contains(function ($rule) {
+            return (!is_null($rule->min_age) && $rule->min_age <= 12);
+        });
+
         $features = [
           ['icon' => 'ic-cup-filled.svg', 'label' => 'Obat Bebas'],
-          ['icon' => 'ic-clipboard-tick-filled.svg', 'label' => 'Aman Anak'],
+          ['icon' => 'ic-clipboard-tick-filled.svg', 'label' => $isChildSafe ? 'Aman Anak' : 'Dewasa'],
           ['icon' => 'ic-shiled-tick-filled.svg', 'label' => 'BPOM'],
         ];
       @endphp
