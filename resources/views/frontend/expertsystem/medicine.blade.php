@@ -212,8 +212,8 @@
                         <div class="flex gap-3">
                             <!-- Product Image -->
                             <div class="w-20 h-20 bg-gray-100 rounded-xl flex-shrink-0 overflow-hidden">
-                                @if($product->thumbnail)
-                                    <img src="{{ Storage::url($product->thumbnail) }}" 
+                                @if($product->photo)
+                                    <img src="{{ Storage::url($product->photo) }}" 
                                         alt="{{ $product->name }}"
                                         class="w-full h-full object-cover">
                                 @else

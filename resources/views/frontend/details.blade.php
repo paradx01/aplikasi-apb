@@ -113,6 +113,41 @@
                         </div>
                     @endif
 
+                    <!-- Rekomendasi Obat Alternatif yang Aman -->
+                    @auth
+                        @if (isset($alternativeProducts) && $alternativeProducts->count() > 0)
+                            <div class="bg-green-50 border border-green-200 rounded-2xl p-5 flex flex-col gap-3">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    <h4 class="font-bold text-base text-green-800">Rekomendasi Obat Alternatif</h4>
+                                </div>
+                                <p class="text-xs text-green-700 -mt-1">Obat berikut dalam kategori yang sama dan aman untuk
+                                    kondisi medis Anda:</p>
+
+                                <div class="grid grid-cols-2 gap-3 mt-2">
+                                    @foreach ($alternativeProducts as $alt)
+                                        <a href="{{ route('frontend.product.details', $alt->slug) }}"
+                                            class="bg-white rounded-xl p-3 flex flex-col gap-2 items-center shadow-sm hover:shadow-md transition-shadow">
+                                            <img src="{{ Storage::url($alt->photo) }}" class="h-[60px] w-full object-contain"
+                                                alt="{{ $alt->name }}">
+                                            <div class="w-full text-center">
+                                                <p class="text-xs font-semibold truncate">{{ $alt->name }}</p>
+                                                <p class="text-xs text-grey">Rp {{ number_format($alt->price, 0, ',', '.') }}
+                                                </p>
+                                            </div>
+                                            <span
+                                                class="text-[10px] font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Aman</span>
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+                    @endauth
+
                     {{-- Kehamilan Warning --}}
                     @if ($pregnancyWarning)
                         <div
@@ -164,14 +199,6 @@
         <!-- Features Badges -->
         <div class="flex flex-row justify-center gap-2 mx-2 relative px-4 mb-4">
             @php
-                // Cek apakah produk aman untuk anak berdasarkan medication_rules
-                // Produk dianggap aman anak jika ada aturan pakai "Anak-anak" DENGAN dosis yang terisi
-                $isChildSafe = $product->medicationRules->contains(function ($rule) {
-                    $condition = strtolower($rule->special_condition ?? '');
-                    $hasDosage = !empty($rule->default_dosage);
-                    return str_contains($condition, 'anak') && $hasDosage;
-                });
-
                 $features = [
                     ['icon' => 'ic-cup-filled.svg', 'label' => 'Obat Bebas'],
                     ['icon' => 'ic-clipboard-tick-filled.svg', 'label' => $isChildSafe ? 'Aman Anak' : 'Dewasa'],
@@ -314,34 +341,6 @@
                 @endforeach
             </div>
         @endif
-
-        <!-- Rekomendasi Obat Alternatif yang Aman -->
-        @auth
-          @if(isset($alternativeProducts) && $alternativeProducts->count() > 0)
-            <div class="bg-green-50 border border-green-200 rounded-2xl p-5 flex flex-col gap-3">
-              <div class="flex items-center gap-2 mb-1">
-                <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                </svg>
-                <h4 class="font-bold text-base text-green-800">Rekomendasi Obat Alternatif</h4>
-              </div>
-              <p class="text-xs text-green-700 -mt-1">Obat berikut dalam kategori yang sama dan aman untuk kondisi medis Anda:</p>
-              
-              <div class="grid grid-cols-2 gap-3 mt-2">
-                @foreach($alternativeProducts as $alt)
-                  <a href="{{ route('frontend.product.details', $alt->slug) }}" class="bg-white rounded-xl p-3 flex flex-col gap-2 items-center shadow-sm hover:shadow-md transition-shadow">
-                    <img src="{{ Storage::url($alt->photo) }}" class="h-[60px] w-full object-contain" alt="{{ $alt->name }}">
-                    <div class="w-full text-center">
-                      <p class="text-xs font-semibold truncate">{{ $alt->name }}</p>
-                      <p class="text-xs text-grey">Rp {{ number_format($alt->price, 0, ',', '.') }}</p>
-                    </div>
-                    <span class="text-[10px] font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">Aman</span>
-                  </a>
-                @endforeach
-              </div>
-            </div>
-          @endif
-        @endauth
 
         <!-- Fixed Checkout Footer -->
         <section id="fixed-checkout-footer" class="fixed inset-x-0 bottom-0 z-40 p-5 bg-white shadow-2xl">

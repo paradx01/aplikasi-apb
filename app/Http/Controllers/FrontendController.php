@@ -109,7 +109,29 @@ class FrontendController extends Controller
             if ($product->contraindications) {
                 $productContra = array_map('trim', explode(',', $product->contraindications));
                 
-                foreach (self::CONDITION_MAP as $field => $label) {
+                $conditionMap = [
+                    'has_hypertension'        => 'Hipertensi',
+                    'has_heart_disorder'      => 'Gangguan Jantung',
+                    'has_diabetes'            => 'Diabetes',
+                    'has_kidney_disorder'     => 'Gangguan Ginjal',
+                    'has_stomach_ulcer'       => 'Tukak Lambung',
+                    'has_liver_disorder'      => 'Gangguan Hati',
+                    'has_asthma'              => 'Asma',
+                    'has_glaucoma'            => 'Glaukoma',
+                    'has_prostate_disorder'   => 'Gangguan Prostat',
+                    'has_hyperthyroidism'     => 'Hipertiroidisme',
+                    'has_g6pd_deficiency'     => 'Defisiensi G6PD',
+                    'has_allergy_paracetamol' => 'Alergi Paracetamol',
+                    'has_allergy_nsaid'       => 'Alergi NSAID',
+                    'has_allergy_aspirin'     => 'Alergi Aspirin',
+                    'has_allergy_antihistamine'=> 'Alergi Antihistamin',
+                    'has_allergy_decongestant'=> 'Alergi Dekongestan',
+                    'has_allergy_bromhexine'  => 'Alergi Bromhexine',
+                    'has_allergy_guaifenesin' => 'Alergi Guaifenesin',
+                    'has_allergy_antacid'     => 'Alergi Antasida',
+                ];
+
+                foreach ($conditionMap as $field => $label) {
                     if ($user->$field && in_array($label, $productContra)) {
                         $safetyWarnings[] = $label;
                     }
@@ -174,6 +196,17 @@ class FrontendController extends Controller
             }
         }
 
+        // Cek apakah produk aman untuk anak
+        // Rule harus: kategori "Anak" + dosis terisi + rentang umur valid (max_age <= 17)
+        $isChildSafe = $product->medicationRules->contains(function ($rule) {
+            $condition = strtolower(trim($rule->special_condition ?? ''));
+            $dosage = trim($rule->default_dosage ?? '');
+            $hasValidAge = !is_null($rule->min_age) && !is_null($rule->max_age) 
+                           && $rule->max_age > 0 && $rule->max_age <= 17;
+            
+            return str_contains($condition, 'anak') && $dosage !== '' && $hasValidAge;
+        });
+
         return view('frontend.details', [
             'product' => $product,
             'medication_rules' => $product->medicationRules,
@@ -181,6 +214,7 @@ class FrontendController extends Controller
             'pregnancyWarning' => $pregnancyWarning,
             'ageWarning' => $ageWarning,
             'alternativeProducts' => $alternativeProducts,
+            'isChildSafe' => $isChildSafe,
         ]);
     }
     
