@@ -111,18 +111,37 @@
             </div>
             </div>
 
-            <!-- Section 3: Riwayat Penyakit -->
-            <div class="p-6 bg-white rounded-3xl">
-                <div class="text-lg font-semibold mb-2 text-indigo-950">
-                    Riwayat Penyakit & Kondisi Kesehatan
+            <!-- Section 3: Status Kehamilan (hanya perempuan) -->
+            <div id="pregnancy-section" class="p-6 bg-white rounded-3xl" style="display: {{ old('gender', $user->gender) == 'P' ? 'block' : 'none' }};">
+                <div class="flex gap-2 items-start bg-pink-50 border border-pink-200 rounded-xl px-4 py-3">
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-pink-800">Apakah Anda sedang hamil?</p>
+                        <p class="text-xs text-pink-600 mt-0.5">Penting untuk filter obat yang aman untuk ibu hamil.</p>
+                    </div>
+                    <div class="flex gap-3 items-center">
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="is_pregnant" value="1"
+                                {{ old('is_pregnant', $user->is_pregnant) == 1 ? 'checked' : '' }}
+                                class="w-4 h-4 text-pink-600 border-gray-300">
+                            <span class="ml-1.5 text-xs font-medium text-pink-700">Ya</span>
+                        </label>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="radio" name="is_pregnant" value="0"
+                                {{ old('is_pregnant', $user->is_pregnant) == 0 ? 'checked' : '' }}
+                                class="w-4 h-4 text-gray-600 border-gray-300">
+                            <span class="ml-1.5 text-xs font-medium text-gray-600">Tidak</span>
+                        </label>
+                    </div>
                 </div>
-                <p class="text-xs text-gray-600 mb-4">
-                    Informasi ini penting untuk keamanan rekomendasi obat yang sesuai dengan kondisi Anda.
-                </p>
-                
+            </div>
+
+            <!-- Section 4: Riwayat Penyakit -->
+            <div class="p-6 bg-white rounded-3xl">
+                <div class="text-lg font-semibold mb-2 text-indigo-950">Riwayat Penyakit</div>
+                <p class="text-xs text-gray-600 mb-4">Pilih kondisi yang pernah atau sedang Anda alami. Biarkan "Tidak" jika tidak ada.</p>
+
                 <div class="flex flex-col gap-3">
-                    <!-- Info Box -->
-                    <div class="flex gap-2 items-start bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-3">
+                    <div class="flex gap-2 items-start bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 mb-1">
                         <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                         </svg>
@@ -131,433 +150,83 @@
                         </p>
                     </div>
 
-                    <!-- Hamil (Hanya untuk Perempuan) -->
-                    <div class="flex gap-2 items-center justify-between bg-pink-50 border border-pink-200 rounded-xl px-4 py-3"
-                        style="display: {{ old('gender', $user->gender) == 'P' ? 'flex' : 'none' }};">
-                        <div class="flex items-start gap-2 flex-1">
-                            <div class="flex-1">
-                                <p class="text-sm font-semibold text-pink-800">Apakah Anda sedang hamil?</p>
-                                <p class="text-xs text-pink-600 mt-0.5">Penting untuk filter obat yang aman.</p>
+                    @php
+                        $conditions = [
+                            ['name' => 'has_hypertension', 'label' => 'Hipertensi (tekanan darah tinggi)'],
+                            ['name' => 'has_heart_disorder', 'label' => 'Gangguan Jantung'],
+                            ['name' => 'has_diabetes', 'label' => 'Diabetes (kencing manis)'],
+                            ['name' => 'has_kidney_disorder', 'label' => 'Gangguan Ginjal'],
+                            ['name' => 'has_stomach_ulcer', 'label' => 'Maag / Tukak Lambung'],
+                            ['name' => 'has_liver_disorder', 'label' => 'Gangguan Hati (Hepatitis, Sirosis)'],
+                            ['name' => 'has_asthma', 'label' => 'Asma'],
+                            ['name' => 'has_glaucoma', 'label' => 'Glaukoma'],
+                            ['name' => 'has_prostate_disorder', 'label' => 'Gangguan Prostat'],
+                            ['name' => 'has_hyperthyroidism', 'label' => 'Hipertiroidisme'],
+                            ['name' => 'has_g6pd_deficiency', 'label' => 'Defisiensi G6PD'],
+                        ];
+                    @endphp
+
+                    @foreach($conditions as $c)
+                        <div class="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2.5">
+                            <span class="text-xs font-medium text-gray-700 flex-1 pr-2">{{ $c['label'] }}</span>
+                            <div class="flex gap-2 shrink-0">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="{{ $c['name'] }}" value="1"
+                                        {{ old($c['name'], $user->{$c['name']}) == 1 ? 'checked' : '' }}
+                                        class="w-4 h-4 text-primary border-gray-300">
+                                    <span class="ml-1 text-xs text-green-600">Ya</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="{{ $c['name'] }}" value="0"
+                                        {{ old($c['name'], $user->{$c['name']}) == 0 ? 'checked' : '' }}
+                                        class="w-4 h-4 text-primary border-gray-300">
+                                    <span class="ml-1 text-xs text-gray-500">Tidak</span>
+                                </label>
                             </div>
                         </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="is_pregnant" value="1"
-                                    {{ old('is_pregnant', $user->is_pregnant) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500">
-                                <span class="ml-1.5 text-xs font-medium text-pink-700">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="is_pregnant" value="0"
-                                    {{ old('is_pregnant', $user->is_pregnant) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500">
-                                <span class="ml-1.5 text-xs font-medium text-gray-600">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Hipertensi -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami hipertensi (tekanan darah tinggi)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_hypertension" value="1"
-                                    {{ old('has_hypertension', $user->has_hypertension) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_hypertension" value="0"
-                                    {{ old('has_hypertension', $user->has_hypertension) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Gangguan Jantung -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami gangguan jantung (misalnya riwayat serangan jantung, aritmia, gagal jantung)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_heart_disorder" value="1"
-                                    {{ old('has_heart_disorder', $user->has_heart_disorder) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_heart_disorder" value="0"
-                                    {{ old('has_heart_disorder', $user->has_heart_disorder) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Diabetes -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami diabetes (kencing manis)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_diabetes" value="1"
-                                    {{ old('has_diabetes', $user->has_diabetes) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_diabetes" value="0"
-                                    {{ old('has_diabetes', $user->has_diabetes) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Gangguan Ginjal -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami gangguan ginjal?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_kidney_disorder" value="1"
-                                    {{ old('has_kidney_disorder', $user->has_kidney_disorder) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_kidney_disorder" value="0"
-                                    {{ old('has_kidney_disorder', $user->has_kidney_disorder) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Maag/Tukak Lambung -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami maag berat, tukak lambung, atau riwayat perdarahan lambung?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_stomach_ulcer" value="1"
-                                    {{ old('has_stomach_ulcer', $user->has_stomach_ulcer) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_stomach_ulcer" value="0"
-                                    {{ old('has_stomach_ulcer', $user->has_stomach_ulcer) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Gangguan Hati -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami gangguan hati (misalnya hepatitis berat, sirosis, gagal hati)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_liver_disorder" value="1"
-                                    {{ old('has_liver_disorder', $user->has_liver_disorder) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_liver_disorder" value="0"
-                                    {{ old('has_liver_disorder', $user->has_liver_disorder) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Asma -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami asma?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_asthma" value="1"
-                                    {{ old('has_asthma', $user->has_asthma) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_asthma" value="0"
-                                    {{ old('has_asthma', $user->has_asthma) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Glaukoma -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami glaukoma (tekanan bola mata tinggi)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_glaucoma" value="1"
-                                    {{ old('has_glaucoma', $user->has_glaucoma) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_glaucoma" value="0"
-                                    {{ old('has_glaucoma', $user->has_glaucoma) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Gangguan Prostat -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah atau sedang mengalami pembesaran prostat / sulit berkemih (BPH)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_prostate_disorder" value="1"
-                                    {{ old('has_prostate_disorder', $user->has_prostate_disorder) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_prostate_disorder" value="0"
-                                    {{ old('has_prostate_disorder', $user->has_prostate_disorder) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Hipertiroidisme -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah didiagnosis hipertiroidisme (kelenjar tiroid terlalu aktif)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_hyperthyroidism" value="1"
-                                    {{ old('has_hyperthyroidism', $user->has_hyperthyroidism) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_hyperthyroidism" value="0"
-                                    {{ old('has_hyperthyroidism', $user->has_hyperthyroidism) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Defisiensi G6PD -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda pernah diberitahu dokter memiliki defisiensi G6PD?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_g6pd_deficiency" value="1"
-                                    {{ old('has_g6pd_deficiency', $user->has_g6pd_deficiency) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_g6pd_deficiency" value="0"
-                                    {{ old('has_g6pd_deficiency', $user->has_g6pd_deficiency) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Alergi Paracetamol -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda memiliki alergi terhadap Paracetamol (misal: Sanmol, Panadol, Bodrex)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_allergy_paracetamol" value="1"
-                                    {{ old('has_allergy_paracetamol', $user->has_allergy_paracetamol) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_allergy_paracetamol" value="0"
-                                    {{ old('has_allergy_paracetamol', $user->has_allergy_paracetamol) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Alergi NSAID -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda memiliki alergi terhadap obat antiinflamasi (NSAID seperti Ibuprofen, Asam Mefenamat)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_allergy_nsaid" value="1"
-                                    {{ old('has_allergy_nsaid', $user->has_allergy_nsaid) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_allergy_nsaid" value="0"
-                                    {{ old('has_allergy_nsaid', $user->has_allergy_nsaid) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Alergi Aspirin -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda memiliki alergi terhadap Aspirin?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_allergy_aspirin" value="1"
-                                    {{ old('has_allergy_aspirin', $user->has_allergy_aspirin) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_allergy_aspirin" value="0"
-                                    {{ old('has_allergy_aspirin', $user->has_allergy_aspirin) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Alergi Antihistamin -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda memiliki alergi terhadap obat antihistamin (misal CTM, Cetirizine, Loratadine)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_allergy_antihistamine" value="1"
-                                    {{ old('has_allergy_antihistamine', $user->has_allergy_antihistamine) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_allergy_antihistamine" value="0"
-                                    {{ old('has_allergy_antihistamine', $user->has_allergy_antihistamine) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Alergi Dekongestan -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda memiliki alergi terhadap dekongestan hidung (misal Pseudoefedrin)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_allergy_decongestant" value="1"
-                                    {{ old('has_allergy_decongestant', $user->has_allergy_decongestant) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_allergy_decongestant" value="0"
-                                    {{ old('has_allergy_decongestant', $user->has_allergy_decongestant) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Alergi Bromhexine -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda memiliki alergi terhadap Bromhexine (obat pengencer dahak)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_allergy_bromhexine" value="1"
-                                    {{ old('has_allergy_bromhexine', $user->has_allergy_bromhexine) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_allergy_bromhexine" value="0"
-                                    {{ old('has_allergy_bromhexine', $user->has_allergy_bromhexine) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Alergi Guaifenesin -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda memiliki alergi terhadap Guaifenesin (obat ekspektoran pengencer dahak)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_allergy_guaifenesin" value="1"
-                                    {{ old('has_allergy_guaifenesin', $user->has_allergy_guaifenesin) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_allergy_guaifenesin" value="0"
-                                    {{ old('has_allergy_guaifenesin', $user->has_allergy_guaifenesin) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Alergi Antasida -->
-                    <div class="flex items-center justify-between bg-gray-100 rounded-xl px-4 py-2">
-                        <div class="mb-1 text-xs font-medium">
-                            Apakah Anda memiliki alergi terhadap obat antasida (misalnya Promag, Mylanta)?
-                        </div>
-                        <div class="flex gap-2">
-                            <label class="inline-flex items-center cursor-pointer">
-                                <input type="radio" name="has_allergy_antacid" value="1"
-                                    {{ old('has_allergy_antacid', $user->has_allergy_antacid) == 1 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-green-600 text-xs">Ya</span>
-                            </label>
-                            <label class="inline-flex items-center cursor-pointer ml-2">
-                                <input type="radio" name="has_allergy_antacid" value="0"
-                                    {{ old('has_allergy_antacid', $user->has_allergy_antacid) == 0 ? 'checked' : '' }}
-                                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                <span class="ml-2 text-gray-600 text-xs">Tidak</span>
-                            </label>
-                        </div>
-                    </div>
-
+                    @endforeach
                 </div>
             </div>
 
+            <!-- Section 5: Alergi Obat -->
+            <div class="p-6 bg-white rounded-3xl">
+                <div class="text-lg font-semibold mb-2 text-indigo-950">Alergi Obat</div>
+                <p class="text-xs text-gray-600 mb-4">Pilih jenis obat yang pernah membuat Anda alergi.</p>
+
+                <div class="flex flex-col gap-3">
+                    @php
+                        $allergies = [
+                            ['name' => 'has_allergy_paracetamol', 'label' => 'Paracetamol (Sanmol, Panadol)'],
+                            ['name' => 'has_allergy_nsaid', 'label' => 'NSAID (Ibuprofen, Asam Mefenamat)'],
+                            ['name' => 'has_allergy_aspirin', 'label' => 'Aspirin'],
+                            ['name' => 'has_allergy_antihistamine', 'label' => 'Antihistamin (CTM, Cetirizine)'],
+                            ['name' => 'has_allergy_decongestant', 'label' => 'Dekongestan (Pseudoefedrin)'],
+                            ['name' => 'has_allergy_bromhexine', 'label' => 'Bromhexine (pengencer dahak)'],
+                            ['name' => 'has_allergy_guaifenesin', 'label' => 'Guaifenesin (ekspektoran)'],
+                            ['name' => 'has_allergy_antacid', 'label' => 'Antasida (Promag, Mylanta)'],
+                        ];
+                    @endphp
+
+                    @foreach($allergies as $a)
+                        <div class="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-2.5">
+                            <span class="text-xs font-medium text-gray-700 flex-1 pr-2">{{ $a['label'] }}</span>
+                            <div class="flex gap-2 shrink-0">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="{{ $a['name'] }}" value="1"
+                                        {{ old($a['name'], $user->{$a['name']}) == 1 ? 'checked' : '' }}
+                                        class="w-4 h-4 text-primary border-gray-300">
+                                    <span class="ml-1 text-xs text-green-600">Ya</span>
+                                </label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="radio" name="{{ $a['name'] }}" value="0"
+                                        {{ old($a['name'], $user->{$a['name']}) == 0 ? 'checked' : '' }}
+                                        class="w-4 h-4 text-primary border-gray-300">
+                                    <span class="ml-1 text-xs text-gray-500">Tidak</span>
+                                </label>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
                  
             <!-- Submit Button -->
@@ -572,5 +241,16 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="{{ asset('scripts/global.js') }}"></script>
   <script src="{{ asset('scripts/fixedTopbar.js') }}"></script>
+  <script>
+    // Toggle pregnancy section based on gender
+    const genderSelect = document.getElementById('gender');
+    const pregnancySection = document.getElementById('pregnancy-section');
+    
+    function togglePregnancy() {
+      pregnancySection.style.display = genderSelect.value === 'P' ? 'block' : 'none';
+    }
+    
+    genderSelect.addEventListener('change', togglePregnancy);
+  </script>
 </body>
 </html>
