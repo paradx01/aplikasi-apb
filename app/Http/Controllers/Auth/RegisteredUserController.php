@@ -32,7 +32,17 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'string', 'min:8', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'name.required' => 'The name field is required',
+            'name.max' => 'The name must not be greater than 255 characters',
+            'email.required' => 'The email field is required',
+            'email.email' => 'The email must be a valid email address',
+            'email.lowercase' => 'The email must be lowercase',
+            'email.unique' => 'The email has already been taken',
+            'password.required' => 'The password field is required',
+            'password.min' => 'The password must be at least 8 characters',
+            'password.confirmed' => 'The password confirmation does not match',
         ]);
 
         $user = User::create([
@@ -51,7 +61,7 @@ class RegisteredUserController extends Controller
         if ($user->hasRole('apoteker')) {
             return redirect()->route('dashboard');
         } else {
-            return redirect()->route('frontend.index'); // misal index store
+            return redirect()->route('profile.complete'); // Onboarding: isi data profil medis
         }
     }
 }

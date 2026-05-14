@@ -33,6 +33,18 @@ class LoginRequest extends FormRequest
     }
 
     /**
+     * Custom validation messages.
+     */
+    public function messages(): array
+    {
+        return [
+            'email.required' => 'The email field is required',
+            'email.email' => 'The email must be a valid email address',
+            'password.required' => 'The password field is required',
+        ];
+    }
+
+    /**
      * Attempt to authenticate the request's credentials.
      *
      * @throws \Illuminate\Validation\ValidationException
@@ -45,7 +57,7 @@ class LoginRequest extends FormRequest
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                'email' => 'These credentials do not match our records',
             ]);
         }
 

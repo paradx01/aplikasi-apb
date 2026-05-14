@@ -29,6 +29,10 @@ Route::post('/push/subscription', [MedicationReminderController::class, 'saveSub
 // Route membutuhkan auth
 Route::middleware('auth')->group(function() {
 
+    // Profile completion (onboarding) — harus bisa diakses tanpa profile.complete middleware
+    Route::get('/profile/complete', [ProfileController::class, 'completeProfile'])->name('profile.complete');
+    Route::post('/profile/complete/store', [ProfileController::class, 'storeCompleteProfile'])->name('profile.complete.store');
+
     // Profile & Settings
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/admin/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -37,12 +41,12 @@ Route::middleware('auth')->group(function() {
     Route::put('/profile/updated', [ProfileController::class, 'updateBuyer'])->name('profile.update.buyer');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Cart
-    Route::resource('carts', CartController::class)->middleware('role:buyer');
-    Route::post('cart/add/{productId}', [CartController::class, 'store'])->middleware('role:buyer')->name('carts.add');
+    // Cart — membutuhkan profil lengkap
+    Route::resource('carts', CartController::class)->middleware(['role:buyer', 'profile.complete']);
+    Route::post('cart/add/{productId}', [CartController::class, 'store'])->middleware(['role:buyer', 'profile.complete'])->name('carts.add');
 
     // Addresses List
-    Route::prefix('addresses')->name('frontend.addresses.')->middleware('role:buyer')->group(function() {
+    Route::prefix('addresses')->name('frontend.addresses.')->middleware(['role:buyer', 'profile.complete'])->group(function() {
         Route::get('/addresslist', [UserAddressController::class, 'index'])->name('index');
         Route::get('/create', [UserAddressController::class, 'create'])->name('create');
         Route::post('/', [UserAddressController::class, 'store'])->name('store');
@@ -55,7 +59,7 @@ Route::middleware('auth')->group(function() {
     Route::get(
         'product_transactions/checkout/success',
         [ProductTransactionController::class, 'checkoutSuccess']
-    )->middleware('role:buyer')->name('product_transactions.checkout.success');
+    )->middleware(['role:buyer', 'profile.complete'])->name('product_transactions.checkout.success');
 
     // Product Transactions (role: apoteker or buyer)
     Route::resource('product_transactions', ProductTransactionController::class)->middleware('role:apoteker|buyer');
@@ -83,8 +87,8 @@ Route::middleware('auth')->group(function() {
     // Medication reminders
     Route::get('/reminders', [MedicationReminderController::class, 'index'])->name('frontend.reminders.index');
 
-    // Sistem Pakar Rekomendasi Obat (Forward Chaining)
-    Route::prefix('expert-system')->name('frontend.expertsystem.')->middleware('role:buyer')->group(function() {
+    // Sistem Pakar Rekomendasi Obat (Forward Chaining) — membutuhkan profil lengkap
+    Route::prefix('expert-system')->name('frontend.expertsystem.')->middleware(['role:buyer', 'profile.complete'])->group(function() {
         Route::get('/', [ExpertController::class, 'index'])->name('index');
         Route::get('/gejala-umum', [ExpertController::class, 'showGejalaUmum'])->name('gejalaUmum');
         Route::get('/gejala-kritis', [ExpertController::class, 'showGejalaKritis'])->name('gejalaKritis');

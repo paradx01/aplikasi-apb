@@ -23,29 +23,58 @@
           <p class="text-[22px] font-bold">
             New Account
           </p>
+
+          <!-- Global Error Messages -->
+          @if ($errors->any())
+            <div class="bg-red-50 border border-red-200 rounded-xl p-3">
+              <ul class="text-xs text-red-700 space-y-1">
+                @foreach ($errors->all() as $error)
+                  <li class="flex items-start gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ $error }}</span>
+                  </li>
+                @endforeach
+              </ul>
+            </div>
+          @endif
+
           <!-- Full Name -->
           <div class="flex flex-col gap-2.5">
             <label for="fullname" class="text-base font-semibold">Full Name</label>
             <input style="background-image: url('{{asset('assets/svgs/ic-profile.svg')}}')" type="text" name="name" id="fullname__"
-              class="form-input" placeholder="Write your full name">
+              class="form-input @error('name') !border-red-400 @enderror" placeholder="Write your full name" value="{{ old('name') }}">
+            @error('name')
+              <span class="text-xs text-red-600 -mt-1">{{ $message }}</span>
+            @enderror
           </div>
           <!-- Email Address -->
           <div class="flex flex-col gap-2.5">
             <label for="email" class="text-base font-semibold">Email Address</label>
             <input style="background-image: url('{{asset('assets/svgs/ic-email.svg')}}')" type="email" name="email" id="email__"
-              class="form-input" placeholder="Your email address">
+              class="form-input @error('email') !border-red-400 @enderror" placeholder="Your email address" value="{{ old('email') }}">
+            @error('email')
+              <span class="text-xs text-red-600 -mt-1">{{ $message }}</span>
+            @enderror
           </div>
           <!-- Password -->
           <div class="flex flex-col gap-2.5">
             <label for="password" class="text-base font-semibold">Password</label>
             <input style="background-image: url('{{asset('assets/svgs/ic-lock.svg')}}')" type="password" name="password" id="password__"
-              class="form-input" placeholder="Protect your password">
+              class="form-input @error('password') !border-red-400 @enderror" placeholder="Protect your password">
+            @error('password')
+              <span class="text-xs text-red-600 -mt-1">{{ $message }}</span>
+            @enderror
           </div>
           <!-- Confirm Password -->
           <div class="flex flex-col gap-2.5">
             <label for="password" class="text-base font-semibold">Confirm Password</label>
             <input style="background-image: url('{{asset('assets/svgs/ic-lock.svg')}}')" type="password" name="password_confirmation" id="confirm-password__"
-              class="form-input" placeholder="Protect your password">
+              class="form-input @error('password_confirmation') !border-red-400 @enderror" placeholder="Protect your password">
+            @error('password_confirmation')
+              <span class="text-xs text-red-600 -mt-1">{{ $message }}</span>
+            @enderror
           </div>
           <button type="submit" class="inline-flex text-white font-bold text-base bg-primary rounded-full whitespace-nowrap px-[30px] py-3 justify-center items-center">
             Create My Account

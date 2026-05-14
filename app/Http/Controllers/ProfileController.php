@@ -35,6 +35,79 @@ class ProfileController extends Controller
     }
 
     /**
+     * Tampilkan form lengkapi profil (onboarding user baru)
+     */
+    public function completeProfile(): View|RedirectResponse
+    {
+        $user = Auth::user();
+        
+        // Jika profil sudah lengkap, redirect ke home
+        if (!is_null($user->age) && !is_null($user->gender)) {
+            return redirect()->route('frontend.index');
+        }
+        
+        return view('profile.partials.buyer.complete', compact('user'));
+    }
+
+    /**
+     * Simpan data profil onboarding
+     */
+    public function storeCompleteProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'age' => 'required|integer|min:1|max:150',
+            'gender' => 'required|in:L,P',
+            'is_pregnant' => 'nullable|boolean',
+            'has_hypertension' => 'nullable|boolean',
+            'has_heart_disorder' => 'nullable|boolean',
+            'has_diabetes' => 'nullable|boolean',
+            'has_kidney_disorder' => 'nullable|boolean',
+            'has_stomach_ulcer' => 'nullable|boolean',
+            'has_liver_disorder' => 'nullable|boolean',
+            'has_asthma' => 'nullable|boolean',
+            'has_glaucoma' => 'nullable|boolean',
+            'has_prostate_disorder' => 'nullable|boolean',
+            'has_hyperthyroidism' => 'nullable|boolean',
+            'has_g6pd_deficiency' => 'nullable|boolean',
+            'has_allergy_paracetamol' => 'nullable|boolean',
+            'has_allergy_nsaid' => 'nullable|boolean',
+            'has_allergy_aspirin' => 'nullable|boolean',
+            'has_allergy_antihistamine' => 'nullable|boolean',
+            'has_allergy_decongestant' => 'nullable|boolean',
+            'has_allergy_bromhexine' => 'nullable|boolean',
+            'has_allergy_guaifenesin' => 'nullable|boolean',
+            'has_allergy_antacid' => 'nullable|boolean',
+        ], [
+            'age.required' => 'Usia wajib diisi',
+            'age.min' => 'Usia minimal 1 tahun',
+            'gender.required' => 'Jenis kelamin wajib dipilih',
+        ]);
+
+        $user->age = $validated['age'];
+        $user->gender = $validated['gender'];
+        
+        // Boolean fields
+        $boolFields = [
+            'is_pregnant', 'has_hypertension', 'has_heart_disorder', 'has_diabetes',
+            'has_kidney_disorder', 'has_stomach_ulcer', 'has_liver_disorder', 'has_asthma',
+            'has_glaucoma', 'has_prostate_disorder', 'has_hyperthyroidism', 'has_g6pd_deficiency',
+            'has_allergy_paracetamol', 'has_allergy_nsaid', 'has_allergy_aspirin',
+            'has_allergy_antihistamine', 'has_allergy_decongestant', 'has_allergy_bromhexine',
+            'has_allergy_guaifenesin', 'has_allergy_antacid',
+        ];
+
+        foreach ($boolFields as $field) {
+            $user->$field = $request->$field ? 1 : 0;
+        }
+
+        $user->save();
+
+        return redirect()->route('frontend.index')->with('success', 'Profil berhasil dilengkapi! Selamat berbelanja.');
+    }
+
+    /**
      * Update the user's profile information.
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
